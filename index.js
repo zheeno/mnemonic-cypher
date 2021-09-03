@@ -2,9 +2,9 @@ const mnemonicWords = require("mnemonic-words");
 const Cryptr = require("cryptr");
 
 module.exports.Cypher = class {
-  constructor() {
+  constructor(wordLength) {
     this.dictionary = mnemonicWords;
-    this.wordLength = 12;
+    this.wordLength = wordLength || 12;
     this.mnemonics = [];
   }
 
@@ -40,9 +40,14 @@ module.exports.Cypher = class {
    * @returns String
    */
   genSecret(mnemoics) {
-    const data = mnemoics || this.mnemonics;
-    const secret = data.map((w) => `${w.salt}:${w.word.length}`).join("-");
-    return secret;
+    let data = mnemoics || this.mnemonics;
+    if (typeof data == "string") data = data.split(" ");
+    if (data instanceof Array) {
+      const secret = data.map((w) => `${w.salt}:${w.word.length}`).join("-");
+      return secret;
+    } else {
+      return null;
+    }
   }
 
   /**
@@ -68,6 +73,11 @@ module.exports.Cypher = class {
     return this.genSecret(mnemonics);
   }
 
+  /**
+   * Generates a mnemonic phrase from secret
+   * @param {*} secret 
+   * @returns String
+   */
   phraseFromSecret(secret) {
     if (
       typeof secret !== "string" ||
@@ -110,9 +120,9 @@ module.exports.Cypher = class {
       const secret = this.secretFromPhrase(phrase);
       const cryptr = new Cryptr(secret);
       try {
-        decrypted = JSON.parse(cryptr.decrypt(hexString))
+        decrypted = JSON.parse(cryptr.decrypt(hexString));
       } catch (error) {
-        decrypted = cryptr.decrypt(hexString)
+        decrypted = cryptr.decrypt(hexString);
       }
       return decrypted;
     } catch (error) {

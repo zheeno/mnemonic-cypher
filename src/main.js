@@ -30,7 +30,6 @@ module.exports.Cypher = class {
       });
     }
     return {
-      secret: this.genSecret(),
       mnemonics: this.mnemonics.map((w) => w.word).join(" "),
     };
   }
